@@ -1,0 +1,17 @@
+{
+  "files": {
+    "main.css": "/digvijay789065/manas-prototype-4/static/css/main.e6c13ad2.css",
+    "main.js": "/digvijay789065/manas-prototype-4/static/js/main.0d4b0d00.js",
+    "static/js/453.7b94f592.chunk.js": "/digvijay789065/manas-prototype-4/static/js/453.7b94f592.chunk.js",
+    "static/media/mobile-hero.jpg": "/digvijay789065/manas-prototype-4/static/media/mobile-hero.d0aecf383cb4820f22f4.jpg",
+    "static/media/laptop-hero.jpg": "/digvijay789065/manas-prototype-4/static/media/laptop-hero.a2950334647f044f7399.jpg",
+    "index.html": "/digvijay789065/manas-prototype-4/index.html",
+    "main.e6c13ad2.css.map": "/digvijay789065/manas-prototype-4/static/css/main.e6c13ad2.css.map",
+    "main.0d4b0d00.js.map": "/digvijay789065/manas-prototype-4/static/js/main.0d4b0d00.js.map",
+    "453.7b94f592.chunk.js.map": "/digvijay789065/manas-prototype-4/static/js/453.7b94f592.chunk.js.map"
+  },
+  "entrypoints": [
+    "static/css/main.e6c13ad2.css",
+    "static/js/main.0d4b0d00.js"
+  ]
+}
