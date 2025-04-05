@@ -1,67 +1,120 @@
-import React, { useState, useEffect } from "react";
-import { AppBar, Toolbar, IconButton, Typography, Menu, MenuItem } from "@mui/material";
-import MenuIcon from "@mui/icons-material/Menu";
-import { Link } from "react-router-dom";
+import React, { useState, useEffect } from 'react';
+import { Link, NavLink } from 'react-router-dom';
+import { FaBars, FaTimes } from 'react-icons/fa';
+import './Navbar.css';
+import logo from '../assets/logo.svg';
 
-function Navbar() {
-  const [anchorEl, setAnchorEl] = useState(null);
-  const [isMobile, setIsMobile] = useState(window.innerWidth < 768);
+const Navbar = () => {
+  const [isMobileMenuOpen, setIsMobileMenuOpen] = useState(false);
 
-  // Handle window resize for responsiveness
+  // Close mobile menu when route changes
   useEffect(() => {
-    const handleResize = () => setIsMobile(window.innerWidth < 768);
-    window.addEventListener("resize", handleResize);
-    return () => window.removeEventListener("resize", handleResize);
-  }, []);
+    const handleRouteChange = () => {
+      if (isMobileMenuOpen) {
+        setIsMobileMenuOpen(false);
+      }
+    };
+    
+    // Cleanup function
+    return () => {
+      window.removeEventListener('popstate', handleRouteChange);
+    };
+  }, [isMobileMenuOpen]);
 
-  const handleMenuOpen = (event) => setAnchorEl(event.currentTarget);
-  const handleMenuClose = () => setAnchorEl(null);
+  // Prevent body scroll when mobile menu is open
+  useEffect(() => {
+    if (isMobileMenuOpen) {
+      document.body.style.overflow = 'hidden';
+    } else {
+      document.body.style.overflow = 'visible';
+    }
+  }, [isMobileMenuOpen]);
+
+  const toggleMobileMenu = () => {
+    setIsMobileMenuOpen(!isMobileMenuOpen);
+  };
+
+  const closeMobileMenu = () => {
+    setIsMobileMenuOpen(false);
+  };
 
   return (
-    <AppBar position="static" className="navbar" sx={{ backgroundColor: "#1976d2" }}>
-      <Toolbar>
-        <Typography variant="h6" sx={{ flexGrow: 1 }}>
-          <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>
-            Dr. Manas
+    <>
+      <nav className="navbar">
+        <div className="navbar-container">
+          <Link to="/" className="navbar-logo" onClick={closeMobileMenu}>
+            <img src={logo} alt="Dr. Manas Logo" className="logo-img" />
+            <span className="logo-text">Dr. Manas</span>
           </Link>
-        </Typography>
 
-        {isMobile ? (
-          <>
-            <IconButton edge="end" color="inherit" onClick={handleMenuOpen}>
-              <MenuIcon />
-            </IconButton>
-            <Menu
-              anchorEl={anchorEl}
-              open={Boolean(anchorEl)}
-              onClose={handleMenuClose}
-              sx={{ "& .MuiPaper-root": { width: "200px" } }}
-            >
-              <MenuItem onClick={handleMenuClose} component={Link} to="/">Home</MenuItem>
-              <MenuItem onClick={handleMenuClose} component={Link} to="/chat">Chatbot</MenuItem>
-              <MenuItem onClick={handleMenuClose} component={Link} to="/about">About</MenuItem>
-              <MenuItem onClick={handleMenuClose} component={Link} to="/login">Login</MenuItem>
-            </Menu>
-          </>
-        ) : (
-          <>
-            <Typography sx={{ marginRight: "20px" }}>
-              <Link to="/" style={{ textDecoration: "none", color: "inherit" }}>Home</Link>
-            </Typography>
-            <Typography sx={{ marginRight: "20px" }}>
-              <Link to="/chat" style={{ textDecoration: "none", color: "inherit" }}>Chatbot</Link>
-            </Typography>
-            <Typography sx={{ marginRight: "20px" }}>
-              <Link to="/about" style={{ textDecoration: "none", color: "inherit" }}>About</Link>
-            </Typography>
-            <Typography>
-              <Link to="/login" style={{ textDecoration: "none", color: "inherit" }}>Login</Link>
-            </Typography>
-          </>
-        )}
-      </Toolbar>
-    </AppBar>
+          <button
+            className="mobile-menu-icon"
+            onClick={toggleMobileMenu}
+            aria-label={isMobileMenuOpen ? "Close menu" : "Open menu"}
+            aria-expanded={isMobileMenuOpen}
+          >
+            {isMobileMenuOpen ? <FaTimes /> : <FaBars />}
+          </button>
+
+          <ul className={`nav-menu ${isMobileMenuOpen ? 'active' : ''}`}>
+            <li className="nav-item">
+              <NavLink 
+                to="/" 
+                className={({ isActive }) => 
+                  isActive ? 'nav-links active-link' : 'nav-links'
+                }
+                onClick={closeMobileMenu}
+                end
+              >
+                Home
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink 
+                to="/about" 
+                className={({ isActive }) => 
+                  isActive ? 'nav-links active-link' : 'nav-links'
+                }
+                onClick={closeMobileMenu}
+              >
+                About
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink 
+                to="/login" 
+                className={({ isActive }) => 
+                  isActive ? 'nav-links active-link' : 'nav-links'
+                }
+                onClick={closeMobileMenu}
+              >
+                Login
+              </NavLink>
+            </li>
+            <li className="nav-item">
+              <NavLink 
+                to="/dashboard" 
+                className={({ isActive }) => 
+                  isActive ? 'nav-links active-link' : 'nav-links'
+                }
+                onClick={closeMobileMenu}
+              >
+                Dashboard
+              </NavLink>
+            </li>
+          </ul>
+        </div>
+      </nav>
+      
+      {/* Overlay when mobile menu is open */}
+      {isMobileMenuOpen && (
+        <div 
+          className="mobile-menu-overlay"
+          onClick={closeMobileMenu}
+        />
+      )}
+    </>
   );
-}
+};
 
 export default Navbar;

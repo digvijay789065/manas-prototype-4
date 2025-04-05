@@ -1,105 +1,248 @@
 import React from "react";
-import { Button, Typography, Box } from "@mui/material";
+import { 
+  Box, 
+  Button, 
+  Typography, 
+  Card, 
+  CardContent, 
+  Grid,
+  useTheme,
+  Avatar,
+  Paper,
+  useMediaQuery
+} from "@mui/material";
 import { useNavigate } from "react-router-dom";
+import {
+  Videocam,
+  Chat,
+  MedicalServices,
+  HealthAndSafety
+} from "@mui/icons-material";
 
 function Dashboard() {
   const navigate = useNavigate();
+  const theme = useTheme();
+  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
 
-  const handleVideoCall = () => {
-    navigate("/video-call");
-  };
-
-  const handleChat = () => {
-    navigate("/chat");
-  };
+  const features = [
+    {
+      icon: <Videocam fontSize={isMobile ? "medium" : "large"} />,
+      title: "Video Consultation",
+      description: "Real-time video call with Dr. Manas",
+      action: () => navigate("/video-call"),
+      color: theme.palette.primary.main
+    },
+    {
+      icon: <Chat fontSize={isMobile ? "medium" : "large"} />,
+      title: "AI Chat Assistant",
+      description: "24/7 text-based health support",
+      action: () => navigate("/chat"),
+      color: theme.palette.secondary.main
+    },
+    {
+      icon: <MedicalServices fontSize={isMobile ? "medium" : "large"} />,
+      title: "Health Records",
+      description: "Access your medical history",
+      action: () => navigate("/records"),
+      color: theme.palette.success.main
+    },
+    {
+      icon: <HealthAndSafety fontSize={isMobile ? "medium" : "large"} />,
+      title: "Wellness Tips",
+      description: "Personalized health recommendations",
+      action: () => navigate("/wellness"),
+      color: theme.palette.warning.main
+    }
+  ];
 
   return (
     <Box
       sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
         minHeight: "100vh",
-        padding: "20px",
-        background: "linear-gradient(120deg, #89f7fe, #66a6ff)",
+        background: "linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%)",
+        p: isMobile ? 2 : 3,
+        pb: 4
       }}
     >
       <Box
         sx={{
-          textAlign: "center",
-          padding: "20px",
-          background: "rgba(255, 255, 255, 0.9)",
-          borderRadius: "12px",
-          boxShadow: "0 10px 20px rgba(0, 0, 0, 0.2)",
-          width: "100%",
-          maxWidth: "600px",
+          maxWidth: "1200px",
+          mx: "auto",
+          mt: { xs: 2, md: 6 }
         }}
       >
-        <Typography
-          variant="h4"
-          fontWeight="bold"
+        {/* Header Section */}
+        <Box
           sx={{
-            color: "#0072ff",
-            fontSize: { xs: "2rem", sm: "2.5rem" },
-            textTransform: "uppercase",
-            letterSpacing: "2px",
-            background: "linear-gradient(120deg, #00c6ff, #0072ff)",
-            WebkitBackgroundClip: "text",
-            color: "transparent",
+            textAlign: "center",
+            mb: isMobile ? 4 : 6,
+            px: isMobile ? 1 : 0
           }}
         >
-          Dr. Manas is Here!
-        </Typography>
-
-        <Typography
-          variant="h6"
-          sx={{
-            mt: 2,
-            color: "#444",
-            fontSize: "1.2rem",
-            fontWeight: "400",
-          }}
-        >
-          Choose one of the options below to get started:
-        </Typography>
-
-        <Box sx={{ mt: 4, width: "100%" }}>
-          <Button
-            variant="contained"
-            color="primary"
+          <Typography
+            variant={isMobile ? "h4" : "h3"}
             sx={{
-              padding: "12px 24px",
-              fontSize: "18px",
-              marginBottom: "16px",
-              borderRadius: "8px",
-              width: "100%",
-              "&:hover": {
-                backgroundColor: "#0056b3",
-              },
+              fontWeight: 700,
+              mb: 2,
+              color: theme.palette.primary.dark,
+              fontSize: isMobile ? '1.8rem' : '2.5rem'
             }}
-            onClick={handleVideoCall}
           >
-            Video Call with Dr. Manas
-          </Button>
-
-          <Button
-            variant="contained"
-            color="secondary"
+            Welcome to Your Health Dashboard
+          </Typography>
+          <Typography
+            variant={isMobile ? "body1" : "h6"}
             sx={{
-              padding: "12px 24px",
-              fontSize: "18px",
-              borderRadius: "8px",
-              width: "100%",
-              "&:hover": {
-                backgroundColor: "#c62828",
-              },
+              color: theme.palette.text.secondary,
+              maxWidth: "600px",
+              mx: "auto",
+              px: isMobile ? 1 : 0
             }}
-            onClick={handleChat}
           >
-            Chat with Dr. Manas
-          </Button>
+            Access all your healthcare services in one place
+          </Typography>
         </Box>
+
+        {/* Features Grid - Fixed for Mobile */}
+        <Grid 
+          container 
+          spacing={isMobile ? 2 : 4}
+          sx={{
+            justifyContent: "center",
+            alignItems: "stretch"
+          }}
+        >
+          {features.map((feature, index) => (
+            <Grid 
+              item 
+              xs={12} 
+              sm={6} 
+              md={3} 
+              key={index}
+              sx={{
+                display: "flex",
+                minHeight: "100%"
+              }}
+            >
+              <Card
+                sx={{
+                  width: "100%",
+                  display: "flex",
+                  flexDirection: "column",
+                  borderRadius: "12px",
+                  boxShadow: theme.shadows[3],
+                  transition: "transform 0.3s",
+                  "&:hover": {
+                    transform: isMobile ? "none" : "translateY(-5px)",
+                    boxShadow: isMobile ? theme.shadows[3] : theme.shadows[6]
+                  }
+                }}
+              >
+                <CardContent
+                  sx={{
+                    flexGrow: 1,
+                    display: "flex",
+                    flexDirection: "column",
+                    alignItems: "center",
+                    textAlign: "center",
+                    p: isMobile ? 2 : 3
+                  }}
+                >
+                  <Avatar
+                    sx={{
+                      bgcolor: `${feature.color}20`,
+                      color: feature.color,
+                      width: isMobile ? 50 : 60,
+                      height: isMobile ? 50 : 60,
+                      mb: isMobile ? 2 : 3
+                    }}
+                  >
+                    {feature.icon}
+                  </Avatar>
+                  <Typography
+                    variant={isMobile ? "h6" : "h5"}
+                    sx={{
+                      fontWeight: 600,
+                      mb: 1,
+                      fontSize: isMobile ? '1.1rem' : '1.25rem'
+                    }}
+                  >
+                    {feature.title}
+                  </Typography>
+                  <Typography
+                    variant="body2"
+                    color="text.secondary"
+                    sx={{ 
+                      mb: isMobile ? 1.5 : 3,
+                      fontSize: isMobile ? '0.9rem' : '1rem'
+                    }}
+                  >
+                    {feature.description}
+                  </Typography>
+                  <Button
+                    variant="contained"
+                    size={isMobile ? "small" : "medium"}
+                    sx={{
+                      mt: "auto",
+                      borderRadius: "8px",
+                      px: isMobile ? 2 : 4,
+                      bgcolor: feature.color,
+                      fontSize: isMobile ? '0.8rem' : '0.9rem',
+                      "&:hover": {
+                        bgcolor: feature.color,
+                        opacity: 0.9
+                      }
+                    }}
+                    onClick={feature.action}
+                  >
+                    Access
+                  </Button>
+                </CardContent>
+              </Card>
+            </Grid>
+          ))}
+        </Grid>
+
+        {/* Recent Activity Section */}
+        <Paper
+          elevation={0}
+          sx={{
+            mt: isMobile ? 4 : 6,
+            p: isMobile ? 2 : 3,
+            borderRadius: "12px",
+            background: theme.palette.background.paper
+          }}
+        >
+          <Typography
+            variant={isMobile ? "h6" : "h5"}
+            sx={{
+              fontWeight: 600,
+              mb: 2,
+              color: theme.palette.primary.dark
+            }}
+          >
+            Your Recent Activity
+          </Typography>
+          <Box
+            sx={{
+              display: "flex",
+              justifyContent: "center",
+              alignItems: "center",
+              minHeight: "80px",
+              border: `1px dashed ${theme.palette.divider}`,
+              borderRadius: "8px",
+              p: 2
+            }}
+          >
+            <Typography 
+              variant="body2"
+              color="text.secondary"
+              sx={{ textAlign: "center" }}
+            >
+              {isMobile ? "Activity will appear here" : "Your recent consultations and health data will appear here"}
+            </Typography>
+          </Box>
+        </Paper>
       </Box>
     </Box>
   );

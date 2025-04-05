@@ -1,232 +1,304 @@
 import React, { useState } from "react";
-import { getAuth, signInWithEmailAndPassword, signInAnonymously, createUserWithEmailAndPassword } from "firebase/auth";
-import { app } from "../firebase"; // Firebase Config Imported
-import { useNavigate } from "react-router-dom"; // Import useNavigate for redirection
+import { 
+  Box, 
+  Button, 
+  TextField, 
+  Typography, 
+  Divider,
+  Paper,
+  useTheme,
+  Alert,
+  Snackbar,
+  IconButton,
+  InputAdornment,
+  CircularProgress
+} from "@mui/material";
+import { 
+  getAuth, 
+  signInWithEmailAndPassword, 
+  signInAnonymously, 
+  createUserWithEmailAndPassword 
+} from "firebase/auth";
+import { app } from "../firebase";
+import { useNavigate } from "react-router-dom";
+import { 
+  Visibility, 
+  VisibilityOff,
+  AccountCircle,
+  Lock,
+  MedicalInformation,
+  Login as LoginIcon,
+  PersonAdd,
+  Person
+} from "@mui/icons-material";
 
-const auth = getAuth(app); // Firebase Authentication
+const auth = getAuth(app);
 
 function Login() {
   const [email, setEmail] = useState("");
   const [password, setPassword] = useState("");
-  const navigate = useNavigate(); // Hook for redirection
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [error, setError] = useState(null);
+  const [openSnackbar, setOpenSnackbar] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+  const theme = useTheme();
+  const navigate = useNavigate();
 
-  // Regular Login Function
-  const handleLogin = () => {
-    console.log("Attempting login with email:", email);
-    signInWithEmailAndPassword(auth, email, password)
-      .then((userCredential) => {
-        console.log("Login Successful:", userCredential.user);
-        alert("Logged in successfully!");
-        navigate("/dashboard"); // Redirect to the dashboard after successful login
-      })
-      .catch((error) => {
-        console.error("Login Error:", error);
-        if (error.code === "auth/user-not-found") {
-          alert("User not found. Please sign up first.");
-        } else if (error.code === "auth/wrong-password") {
-          alert("Incorrect password. Please try again.");
-        } else if (error.code === "auth/invalid-credential") {
-          alert("Invalid credentials. Please check your email and password.");
-        } else {
-          alert(error.message);
-        }
-      });
+  const handleLogin = async () => {
+    try {
+      setLoading(true);
+      await signInWithEmailAndPassword(auth, email, password);
+      navigate("/dashboard");
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Anonymous Login Function
-  const handleAnonymousLogin = () => {
-    console.log("Attempting anonymous login...");
-    signInAnonymously(auth)
-      .then(() => {
-        console.log("Anonymous login successful!");
-        alert("Logged in as Anonymous User!");
-        navigate("/dashboard"); // Redirect to dashboard
-      })
-      .catch((error) => {
-        console.error("Anonymous Login Error:", error);
-        alert(error.message);
-      });
+  const handleAnonymousLogin = async () => {
+    try {
+      setLoading(true);
+      await signInAnonymously(auth);
+      navigate("/dashboard");
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Hardcoded Login Test (Debugging Purpose)
-  const handleTestLogin = () => {
-    console.log("Attempting test login...");
-    signInWithEmailAndPassword(auth, "test@example.com", "password123")
-      .then((userCredential) => {
-        console.log("Test Login Successful:", userCredential.user);
-        alert("Test user logged in successfully!");
-        navigate("/dashboard");
-      })
-      .catch((error) => {
-        console.error("Test Login Error:", error);
-        alert(error.message);
-      });
+  const handleTestLogin = async () => {
+    try {
+      setLoading(true);
+      await signInWithEmailAndPassword(auth, "test@example.com", "password123");
+      navigate("/dashboard");
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setLoading(false);
+    }
   };
 
-  // Register a New User for Debugging
-  const handleRegister = () => {
-    console.log("Attempting user registration...");
-    createUserWithEmailAndPassword(auth, "newuser@example.com", "password123")
-      .then((userCredential) => {
-        console.log("User Registered Successfully:", userCredential.user);
-        alert("User registered successfully!");
-      })
-      .catch((error) => {
-        console.error("Registration Error:", error);
-        alert(error.message);
-      });
+  const handleRegister = async () => {
+    try {
+      setLoading(true);
+      await createUserWithEmailAndPassword(auth, "newuser@example.com", "password123");
+      showSnackbar("Test user registered successfully!");
+    } catch (error) {
+      handleError(error);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleError = (error) => {
+    let message = error.message;
+    if (error.code === "auth/user-not-found") {
+      message = "User not found. Please sign up first.";
+    } else if (error.code === "auth/wrong-password") {
+      message = "Incorrect password. Please try again.";
+    } else if (error.code === "auth/invalid-credential") {
+      message = "Invalid credentials. Please check your email and password.";
+    }
+    setError(message);
+    showSnackbar(message);
+  };
+
+  const showSnackbar = (message) => {
+    setSnackbarMessage(message);
+    setOpenSnackbar(true);
+  };
+
+  const handleCloseSnackbar = () => {
+    setOpenSnackbar(false);
   };
 
   return (
-    <div style={styles.container}>
-      <div style={styles.card}>
-        <div style={styles.header}>
-          <h1 style={styles.heading}>Dr. Manas</h1>
-          <p style={styles.subheading}>Your Health Assistant Awaits</p>
-        </div>
-        <div style={styles.formContainer}>
-          <input
-            type="email"
-            placeholder="Enter Email"
+    <Box
+      sx={{
+        display: "flex",
+        justifyContent: "center",
+        alignItems: "center",
+        minHeight: "100vh",
+        background: "linear-gradient(135deg, #89f7fe 0%, #66a6ff 100%)",
+        p: 2
+      }}
+    >
+      <Paper
+        elevation={10}
+        sx={{
+          width: "100%",
+          maxWidth: "450px",
+          p: 4,
+          borderRadius: "16px",
+          backdropFilter: "blur(8px)",
+          backgroundColor: "rgba(255, 255, 255, 0.9)"
+        }}
+      >
+        <Box sx={{ textAlign: "center", mb: 4 }}>
+          <MedicalInformation 
+            sx={{ 
+              fontSize: 60, 
+              color: theme.palette.primary.main,
+              mb: 1
+            }} 
+          />
+          <Typography 
+            variant="h4" 
+            sx={{ 
+              fontWeight: 700,
+              background: "linear-gradient(120deg, #00c6ff, #0072ff)",
+              WebkitBackgroundClip: "text",
+              color: "transparent",
+              mb: 1
+            }}
+          >
+            Dr. Manas
+          </Typography>
+          <Typography variant="subtitle1" color="text.secondary">
+            Your Health Assistant Awaits
+          </Typography>
+        </Box>
+
+        <Box component="form" sx={{ mb: 3 }}>
+          <TextField
+            fullWidth
+            label="Email"
+            variant="outlined"
             value={email}
             onChange={(e) => setEmail(e.target.value)}
-            style={styles.input}
+            sx={{ mb: 2 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <AccountCircle color="primary" />
+                </InputAdornment>
+              ),
+              style: { borderRadius: "12px" }
+            }}
           />
-          <input
-            type="password"
-            placeholder="Enter Password"
+          <TextField
+            fullWidth
+            label="Password"
+            type={showPassword ? "text" : "password"}
             value={password}
             onChange={(e) => setPassword(e.target.value)}
-            style={styles.input}
+            sx={{ mb: 3 }}
+            InputProps={{
+              startAdornment: (
+                <InputAdornment position="start">
+                  <Lock color="primary" />
+                </InputAdornment>
+              ),
+              endAdornment: (
+                <InputAdornment position="end">
+                  <IconButton
+                    onClick={() => setShowPassword(!showPassword)}
+                    edge="end"
+                  >
+                    {showPassword ? <VisibilityOff /> : <Visibility />}
+                  </IconButton>
+                </InputAdornment>
+              ),
+              style: { borderRadius: "12px" }
+            }}
           />
-          <button onClick={handleLogin} style={styles.button}>
-            Login
-          </button>
-          <div style={styles.separator}>OR</div>
-          <button onClick={handleAnonymousLogin} style={styles.guestButton}>
+
+          <Button
+            fullWidth
+            variant="contained"
+            onClick={handleLogin}
+            disabled={loading}
+            startIcon={<LoginIcon />}
+            sx={{
+              py: 1.5,
+              mb: 2,
+              borderRadius: "12px",
+              fontSize: "1rem",
+              fontWeight: 600
+            }}
+          >
+            {loading ? <CircularProgress size={24} /> : "Login"}
+          </Button>
+
+          <Divider sx={{ my: 3 }}>
+            <Typography variant="body2" color="text.secondary">
+              OR
+            </Typography>
+          </Divider>
+
+          <Button
+            fullWidth
+            variant="outlined"
+            onClick={handleAnonymousLogin}
+            disabled={loading}
+            startIcon={<Person />}
+            sx={{
+              py: 1.5,
+              mb: 2,
+              borderRadius: "12px",
+              fontSize: "1rem",
+              fontWeight: 600,
+              borderWidth: 2,
+              "&:hover": { borderWidth: 2 }
+            }}
+          >
             Continue as Guest
-          </button>
-          <br />
-          <div style={styles.debugButtons}>
-            <button onClick={handleTestLogin} style={styles.debugButton}>
-              Test Login
-            </button>
-            <button onClick={handleRegister} style={styles.debugButton}>
-              Register Test User
-            </button>
-          </div>
-        </div>
-      </div>
-    </div>
+          </Button>
+        </Box>
+
+        <Box sx={{ 
+          display: "flex", 
+          gap: 2,
+          mt: 4,
+          justifyContent: "center"
+        }}>
+          <Button
+            variant="text"
+            onClick={handleTestLogin}
+            disabled={loading}
+            sx={{
+              borderRadius: "12px",
+              fontSize: "0.75rem",
+              textTransform: "none"
+            }}
+          >
+            Test Login
+          </Button>
+          <Button
+            variant="text"
+            onClick={handleRegister}
+            disabled={loading}
+            startIcon={<PersonAdd fontSize="small" />}
+            sx={{
+              borderRadius: "12px",
+              fontSize: "0.75rem",
+              textTransform: "none"
+            }}
+          >
+            Register Test User
+          </Button>
+        </Box>
+      </Paper>
+
+      <Snackbar
+        open={openSnackbar}
+        autoHideDuration={6000}
+        onClose={handleCloseSnackbar}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      >
+        <Alert 
+          onClose={handleCloseSnackbar} 
+          severity="error"
+          sx={{ width: "100%" }}
+        >
+          {snackbarMessage}
+        </Alert>
+      </Snackbar>
+    </Box>
   );
 }
-
-const styles = {
-  container: {
-    display: "flex",
-    justifyContent: "center",
-    alignItems: "center",
-    height: "100vh",
-    background: "linear-gradient(120deg, #89f7fe, #66a6ff)",
-    fontFamily: "'Roboto', sans-serif",
-    padding: "0 20px",
-    overflow: "hidden",
-  },
-  card: {
-    backgroundColor: "rgba(255, 255, 255, 0.85)",
-    padding: "40px",
-    borderRadius: "12px",
-    boxShadow: "0 10px 30px rgba(0, 0, 0, 0.15)",
-    width: "100%",
-    maxWidth: "450px",
-    textAlign: "center",
-    backdropFilter: "blur(10px)",
-    boxSizing: "border-box",
-  },
-  header: {
-    marginBottom: "30px",
-  },
-  heading: {
-    fontSize: "2.5rem",
-    fontWeight: "700",
-    letterSpacing: "2px",
-    textTransform: "uppercase",
-    background: "linear-gradient(120deg, #00c6ff, #0072ff)",
-    WebkitBackgroundClip: "text",
-    color: "transparent",
-  },
-  subheading: {
-    fontSize: "1.1rem",
-    color: "#777",
-    letterSpacing: "0.5px",
-    marginBottom: "30px",
-  },
-  formContainer: {
-    display: "flex",
-    flexDirection: "column",
-    alignItems: "center",
-  },
-  input: {
-    width: "100%",
-    padding: "12px",
-    margin: "12px 0",
-    borderRadius: "8px",
-    border: "2px solid #ddd",
-    backgroundColor: "#f7f7f7",
-    boxSizing: "border-box",
-    fontSize: "1rem",
-    outline: "none",
-    transition: "border 0.3s, box-shadow 0.3s",
-    boxShadow: "0px 0px 8px rgba(0, 0, 0, 0.1)",
-  },
-  button: {
-    padding: "14px 25px",
-    backgroundColor: "#00c6ff",
-    color: "#fff",
-    border: "none",
-    cursor: "pointer",
-    borderRadius: "8px",
-    fontSize: "1.1rem",
-    transition: "background-color 0.3s ease, transform 0.3s ease",
-    width: "100%",
-    marginTop: "10px",
-  },
-  guestButton: {
-    padding: "14px 25px",
-    backgroundColor: "#0072ff",
-    color: "#fff",
-    border: "none",
-    cursor: "pointer",
-    borderRadius: "8px",
-    fontSize: "1.1rem",
-    transition: "background-color 0.3s ease, transform 0.3s ease",
-    width: "100%",
-    marginTop: "10px",
-  },
-  separator: {
-    margin: "20px 0",
-    color: "#bbb",
-    fontSize: "0.9rem",
-    textTransform: "uppercase",
-    letterSpacing: "1px",
-  },
-  debugButtons: {
-    display: "flex",
-    justifyContent: "space-between",
-    width: "100%",
-    marginTop: "20px",
-  },
-  debugButton: {
-    padding: "10px 15px",
-    backgroundColor: "#ff9800",
-    color: "#fff",
-    border: "none",
-    cursor: "pointer",
-    borderRadius: "8px",
-    fontSize: "1rem",
-    transition: "background-color 0.3s ease, transform 0.3s ease",
-    width: "48%",
-  },
-};
 
 export default Login;

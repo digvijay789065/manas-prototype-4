@@ -1,79 +1,285 @@
-import React, { useState, useEffect, useRef } from "react";
-import { Box, Typography, Button, TextField, IconButton } from "@mui/material";
-import SendIcon from "@mui/icons-material/Send";
-import CloseIcon from "@mui/icons-material/Close";
+import React, { useState, useEffect, useRef } from 'react';
+import { 
+  Box, 
+  TextField, 
+  Button, 
+  Typography, 
+  Avatar, 
+  Paper, 
+  List, 
+  ListItem, 
+  ListItemAvatar, 
+  ListItemText,
+  IconButton,
+  Divider,
+  useTheme
+} from '@mui/material';
+import { 
+  Send, 
+  MedicalInformation,
+  Psychology,
+  EmergencyRecording,
+  LocalPharmacy
+} from '@mui/icons-material';
 
-function Chat() {
-  const [messages, setMessages] = useState([{ sender: "bot", text: "Hello! How can I assist you today?" }]);
-  const [input, setInput] = useState("");
-  const chatEndRef = useRef(null);
+// Medical knowledge base
+const medicalKnowledge = {
+  "headache": {
+    dos: [
+      "Rest in a quiet, dark room",
+      "Apply a cool compress to your forehead",
+      "Try over-the-counter pain relievers like acetaminophen or ibuprofen",
+      "Stay hydrated by drinking water"
+    ],
+    donts: [
+      "Don't consume alcohol",
+      "Avoid staring at screens for prolonged periods",
+      "Don't skip meals",
+      "Avoid loud noises and bright lights"
+    ],
+    emergency: "Seek immediate help if: Headache is severe and sudden, accompanied by fever, stiff neck, confusion, or vision changes"
+  },
+  "depression": {
+    dos: [
+      "Maintain a regular sleep schedule",
+      "Engage in light physical activity daily",
+      "Connect with friends or family",
+      "Practice mindfulness or meditation"
+    ],
+    donts: [
+      "Don't isolate yourself for long periods",
+      "Avoid alcohol and drugs",
+      "Don't neglect basic self-care",
+      "Avoid making major life decisions when feeling low"
+    ],
+    emergency: "Seek immediate help if: You have thoughts of self-harm or suicide"
+  },
+  "back pain": {
+    dos: [
+      "Apply ice or heat to the painful area",
+      "Try gentle stretching exercises",
+      "Maintain good posture",
+      "Use over-the-counter pain relievers as needed"
+    ],
+    donts: [
+      "Don't lift heavy objects",
+      "Avoid prolonged bed rest",
+      "Don't sit for long periods without breaks",
+      "Avoid sudden twisting motions"
+    ],
+    emergency: "Seek immediate help if: Pain radiates down your legs, causes weakness/numbness, or follows an injury"
+  }
+};
 
+function DrManasChatbot() {
+  const [input, setInput] = useState('');
+  const [messages, setMessages] = useState([]);
+  const messagesEndRef = useRef(null);
+  const theme = useTheme();
+
+  // Initial greeting
   useEffect(() => {
-    chatEndRef.current?.scrollIntoView({ behavior: "smooth" });
+    setMessages([
+      {
+        text: "Hello! I'm Dr. Manas. How can I help you today? Please describe your symptoms (e.g., headache, back pain, feeling low).",
+        sender: 'bot'
+      }
+    ]);
+  }, []);
+
+  // Auto-scroll to bottom
+  useEffect(() => {
+    messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [messages]);
 
-  const handleSendMessage = async () => {
+  const handleSend = () => {
     if (!input.trim()) return;
 
-    const userMessage = { sender: "user", text: input };
-    setMessages((prev) => [...prev, userMessage]);
+    // Add user message
+    const userMessage = { text: input, sender: 'user' };
+    setMessages(prev => [...prev, userMessage]);
+    setInput('');
 
-    setInput("");
+    // Process input after slight delay
+    setTimeout(() => generateResponse(input.toLowerCase()), 500);
+  };
 
-    const botReply = "I'm still learning. But I'm here to help!";
-    setMessages((prev) => [...prev, { sender: "bot", text: botReply }]);
+  const generateResponse = (userInput) => {
+    let response = { text: "", sender: 'bot' };
+    const symptoms = Object.keys(medicalKnowledge);
+
+    // Check for recognized symptoms
+    const foundSymptom = symptoms.find(symptom => 
+      userInput.includes(symptom)
+    );
+
+    if (foundSymptom) {
+      const { dos, donts, emergency } = medicalKnowledge[foundSymptom];
+      
+      response.text = (
+        <Box>
+          <Typography variant="body1" gutterBottom>
+            For <strong>{foundSymptom}</strong>, here's my advice:
+          </Typography>
+          
+          <Typography variant="h6" sx={{ mt: 2, color: theme.palette.success.main }}>
+            <Psychology sx={{ verticalAlign: 'middle', mr: 1 }} />
+            Recommended:
+          </Typography>
+          <List dense>
+            {dos.map((item, i) => (
+              <ListItem key={`do-${i}`} sx={{ py: 0 }}>
+                <ListItemAvatar sx={{ minWidth: 32 }}>
+                  <Avatar sx={{ bgcolor: theme.palette.success.light, width: 24, height: 24 }}>
+                    <MedicalInformation sx={{ fontSize: 16 }} />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={item} />
+              </ListItem>
+            ))}
+          </List>
+
+          <Typography variant="h6" sx={{ mt: 2, color: theme.palette.error.main }}>
+            <EmergencyRecording sx={{ verticalAlign: 'middle', mr: 1 }} />
+            Avoid:
+          </Typography>
+          <List dense>
+            {donts.map((item, i) => (
+              <ListItem key={`dont-${i}`} sx={{ py: 0 }}>
+                <ListItemAvatar sx={{ minWidth: 32 }}>
+                  <Avatar sx={{ bgcolor: theme.palette.error.light, width: 24, height: 24 }}>
+                    <LocalPharmacy sx={{ fontSize: 16 }} />
+                  </Avatar>
+                </ListItemAvatar>
+                <ListItemText primary={item} />
+              </ListItem>
+            ))}
+          </List>
+
+          <Typography variant="body2" sx={{ 
+            mt: 2, 
+            p: 2, 
+            backgroundColor: theme.palette.warning.light,
+            borderRadius: 1
+          }}>
+            ⚠️ <strong>Emergency:</strong> {emergency}
+          </Typography>
+        </Box>
+      );
+    } else {
+      response.text = "Digvijay didn't trained me for this🙁! Can only tell about headache, back pain and depression";
+    }
+
+    setMessages(prev => [...prev, response]);
   };
 
   return (
-    <Box
-      sx={{
-        display: "flex",
-        flexDirection: "column",
-        alignItems: "center",
-        justifyContent: "center",
-        minHeight: "100vh",
-        padding: "20px",
-        background: "linear-gradient(120deg, #89f7fe, #66a6ff)",
-      }}
-    >
-      <Box
-        sx={{
-          width: "400px",
-          height: "500px",
-          backgroundColor: "#fff",
-          borderRadius: "12px",
-          boxShadow: "0 4px 12px rgba(0, 0, 0, 0.3)",
-          display: "flex",
-          flexDirection: "column",
-          justifyContent: "space-between",
-          padding: "15px",
-        }}
-      >
-        <Box sx={{ display: "flex", justifyContent: "space-between", alignItems: "center", paddingBottom: "10px" }}>
-          <Typography variant="h6" sx={{ color: "#0072ff", fontWeight: "bold" }}>
-            🩺 Dr. Manas Chatbot
-          </Typography>
-          <IconButton onClick={() => window.history.back()}>
-            <CloseIcon />
-          </IconButton>
-        </Box>
+    <Box sx={{ 
+      display: 'flex', 
+      flexDirection: 'column', 
+      height: '80vh',
+      maxWidth: '800px',
+      mx: 'auto',
+      p: 2,
+      border: `1px solid ${theme.palette.divider}`,
+      borderRadius: 2
+    }}>
+      {/* Chat Header */}
+      <Box sx={{ 
+        display: 'flex', 
+        alignItems: 'center', 
+        p: 2,
+        backgroundColor: theme.palette.primary.main,
+        color: 'white',
+        borderRadius: '8px 8px 0 0'
+      }}>
+        <MedicalInformation sx={{ mr: 2 }} />
+        <Typography variant="h6">Dr. Manas - AI Health Assistant</Typography>
+      </Box>
 
-        <Box sx={{ flexGrow: 1, overflowY: "auto", padding: "10px", maxHeight: "350px" }}>
+      {/* Messages Area */}
+      <Box sx={{ 
+        flex: 1, 
+        overflowY: 'auto', 
+        p: 2,
+        backgroundColor: theme.palette.background.default
+      }}>
+        <List>
           {messages.map((msg, index) => (
-            <Box key={index} sx={{ display: "flex", justifyContent: msg.sender === "user" ? "flex-end" : "flex-start" }}>
-              <Box sx={{ padding: "10px", backgroundColor: msg.sender === "user" ? "#0072ff" : "#f0f0f0", color: "#fff", borderRadius: "10px" }}>
-                {msg.text}
-              </Box>
-            </Box>
+            <React.Fragment key={index}>
+              <ListItem 
+                sx={{ 
+                  justifyContent: msg.sender === 'user' ? 'flex-end' : 'flex-start',
+                  alignItems: 'flex-start'
+                }}
+              >
+                {msg.sender === 'bot' && (
+                  <ListItemAvatar sx={{ minWidth: 40 }}>
+                    <Avatar sx={{ bgcolor: theme.palette.primary.main }}>
+                      <MedicalInformation />
+                    </Avatar>
+                  </ListItemAvatar>
+                )}
+                <Paper
+                  elevation={2}
+                  sx={{
+                    p: 2,
+                    maxWidth: '70%',
+                    backgroundColor: msg.sender === 'user' 
+                      ? theme.palette.primary.light 
+                      : theme.palette.background.paper,
+                    color: msg.sender === 'user' ? 'white' : 'inherit',
+                    borderRadius: msg.sender === 'user' 
+                      ? '18px 18px 0 18px' 
+                      : '18px 18px 18px 0'
+                  }}
+                >
+                  {typeof msg.text === 'string' ? (
+                    <Typography>{msg.text}</Typography>
+                  ) : (
+                    msg.text
+                  )}
+                </Paper>
+              </ListItem>
+              <Divider variant="inset" component="li" />
+            </React.Fragment>
           ))}
-          <div ref={chatEndRef}></div>
-        </Box>
+          <div ref={messagesEndRef} />
+        </List>
+      </Box>
 
-        <TextField fullWidth variant="outlined" size="small" value={input} onChange={(e) => setInput(e.target.value)} onKeyDown={(e) => e.key === "Enter" && handleSendMessage()} />
-        <IconButton color="primary" onClick={handleSendMessage}><SendIcon /></IconButton>
+      {/* Input Area */}
+      <Box sx={{ 
+        display: 'flex', 
+        p: 2,
+        borderTop: `1px solid ${theme.palette.divider}`
+      }}>
+        <TextField
+          fullWidth
+          variant="outlined"
+          placeholder="Describe your symptoms..."
+          value={input}
+          onChange={(e) => setInput(e.target.value)}
+          onKeyPress={(e) => e.key === 'Enter' && handleSend()}
+          sx={{ mr: 1 }}
+        />
+        <IconButton
+          color="primary"
+          onClick={handleSend}
+          disabled={!input.trim()}
+          sx={{ 
+            backgroundColor: theme.palette.primary.main,
+            color: 'white',
+            '&:hover': {
+              backgroundColor: theme.palette.primary.dark
+            }
+          }}
+        >
+          <Send />
+        </IconButton>
       </Box>
     </Box>
   );
 }
 
-export default Chat;
+export default DrManasChatbot;
